@@ -1,0 +1,428 @@
+{
+  "params": [
+    {
+      "name": "ConcernColour",
+      "value": "#FE9E00"
+    },
+    {
+      "name": "ImprovementColour",
+      "value": "#2869B2"
+    },
+    {
+      "name": "CommonCauseColour",
+      "value": "#CCCCCC"
+    },
+    {
+      "name": "MeanGroupSizeThreshold",
+      "value": 7
+    },
+    {
+      "name": "TrendGroupSizeThreshold",
+      "value": 7
+    }
+  ],
+  "data": {"name": "dataset"},
+  "title": {"text": "Testing SPC"},
+  "transform": [
+    {
+      "joinaggregate": [
+        {
+          "op": "mean",
+          "field": "Result",
+          "as": "Mean"
+        }
+      ]
+    },
+    {
+      "window": [
+        {
+          "op": "lag",
+          "field": "Result",
+          "as": "Prior1Row"
+        }
+      ]
+    },
+    {
+      "window": [
+        {
+          "op": "lead",
+          "field": "Result",
+          "as": "Following1Row"
+        }
+      ]
+    },
+    {
+      "calculate": "if(isValid(datum.Prior1Row) && isValid(datum.Result), abs(datum.Result - datum.Prior1Row), null)",
+      "as": "MovingAverage"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "mean",
+          "field": "MovingAverage",
+          "as": "MovingRangeAverage"
+        }
+      ]
+    },
+    {
+      "calculate": "if((datum.Result < datum.Mean && datum.Prior1Row < datum.Mean) || (datum.Result > datum.Mean && datum.Prior1Row > datum.Mean) || (datum.Result == datum.Mean && datum.Prior1Row == datum.Mean), 0, 1)",
+      "as": "MeanGroupStart"
+    },
+    {
+      "window": [
+        {
+          "op": "sum",
+          "field": "MeanGroupStart",
+          "as": "MeanGroup"
+        }
+      ]
+    },
+    {
+      "window": [
+        {
+          "op": "count",
+          "field": "MeanGroup",
+          "as": "MeanScore"
+        }
+      ],
+      "frame": [null, null],
+      "groupby": ["MeanGroup"]
+    },
+    {
+      "calculate": "datum.Mean - (2.66 * datum.MovingRangeAverage)",
+      "as": "LCL"
+    },
+    {
+      "calculate": "datum.Mean + (2.66 * datum.MovingRangeAverage)",
+      "as": "UCL"
+    },
+    {
+      "calculate": "if(datum.Result > datum.UCL, 1, 0)",
+      "as": "OutsideUCL"
+    },
+    {
+      "calculate": "if(datum.Result < datum.LCL, 1, 0)",
+      "as": "OutsideLCL"
+    },
+    {
+      "calculate": "if((datum.Result > (datum.Mean + (datum.MovingRangeAverage * 1.77))) && (datum.Result <= (datum.Mean + (datum.MovingRangeAverage * 2.66))), 1, 0)",
+      "as": "NearUCL"
+    },
+    {
+      "window": [
+        {
+          "op": "sum",
+          "field": "NearUCL",
+          "as": "NearUCLScore"
+        }
+      ],
+      "frame": [-2, 2]
+    },
+    {
+      "calculate": "if(datum.NearUCL > 0 && datum.NearUCLScore > 1, 1, 0)",
+      "as": "UCLTwoOfThreeBeyondTwoSigma"
+    },
+    {
+      "calculate": "if((datum.Result < (datum.Mean + (datum.MovingRangeAverage * 1.77))) && (datum.Result >= (datum.Mean + (datum.MovingRangeAverage * 2.66))), 1, 0)",
+      "as": "NearLCL"
+    },
+    {
+      "window": [
+        {
+          "op": "sum",
+          "field": "NearLCL",
+          "as": "NearLCLScore"
+        }
+      ],
+      "frame": [-2, 2]
+    },
+    {
+      "calculate": "if(datum.NearLCL > 0 && datum.NearLCLScore > 1, 1, 0)",
+      "as": "LCLTwoOfThreeBeyondTwoSigma"
+    },
+    {
+      "calculate": "if(datum.Result >= datum.Prior1Row && isValid(datum.Prior1Row), 1, if(datum.Result <= datum.Following1Row && isValid(datum.Following1Row), 1, 0))",
+      "as": "TrendUp"
+    },
+    {
+      "calculate": "if(datum.Result >= datum.Prior1Row && isValid(datum.Prior1Row), 0, 1)",
+      "as": "TrendUpGroupStart"
+    },
+    {
+      "window": [
+        {
+          "op": "sum",
+          "field": "TrendUpGroupStart",
+          "as": "TrendUpGroup"
+        }
+      ]
+    },
+    {
+      "window": [
+        {
+          "op": "count",
+          "field": "TrendUpGroup",
+          "as": "TrendUpScore"
+        }
+      ],
+      "frame": [null, null],
+      "groupby": ["TrendUpGroup"]
+    },
+    {
+      "calculate": "if(datum.TrendUpScore >= 7 && datum.TrendUp == 1, 1, 0)",
+      "as": "TrendUpThreshold"
+    },
+    {
+      "calculate": "if(datum.Result <= datum.Prior1Row && isValid(datum.Prior1Row), 1, if(datum.Result >= datum.Following1Row && isValid(datum.Following1Row), 1, 0))",
+      "as": "TrendDown"
+    },
+    {
+      "calculate": "if(datum.Result <= datum.Prior1Row && isValid(datum.Prior1Row), 0, 1)",
+      "as": "TrendDownGroupStart"
+    },
+    {
+      "window": [
+        {
+          "op": "sum",
+          "field": "TrendDownGroupStart",
+          "as": "TrendDownGroup"
+        }
+      ]
+    },
+    {
+      "window": [
+        {
+          "op": "count",
+          "field": "TrendDownGroup",
+          "as": "TrendDownScore"
+        }
+      ],
+      "frame": [null, null],
+      "groupby": ["TrendDownGroup"]
+    },
+    {
+      "calculate": "if(datum.TrendDownScore >= 7 && datum.TrendDown == 1, 1, 0)",
+      "as": "TrendDownThreshold"
+    },
+    {
+      "calculate": "if(datum.Result == datum.Prior1Row && isValid(datum.Prior1Row), 1, 0)",
+      "as": "TrendEqual"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "line",
+        "strokeWidth": 2
+      },
+      "encoding": {
+        "color": {"value": "gray"},
+        "x": {
+          "field": "Date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "Mean",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "line",
+        "strokeWidth": 2,
+        "strokeDash": [1, 5]
+      },
+      "encoding": {
+        "color": {"value": "green"},
+        "x": {
+          "field": "Date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "Target",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "line",
+        "strokeWidth": 2,
+        "strokeDash": [3, 5]
+      },
+      "encoding": {
+        "color": {"value": "gray"},
+        "x": {
+          "field": "Date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "LCL",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "line",
+        "strokeWidth": 2,
+        "strokeDash": [3, 5]
+      },
+      "encoding": {
+        "color": {"value": "gray"},
+        "x": {
+          "field": "Date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "UCL",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "line",
+        "strokeWidth": 2
+      },
+      "encoding": {
+        "color": {"value": "black"},
+        "x": {
+          "field": "Date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "Result",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "circle",
+        "opacity": 1
+      },
+      "encoding": {
+        "color": {
+          "condition": [
+            {
+              "test": "datum.OutsideUCL === 1 && datum.TargetDirection === 'High'",
+              "value": {
+                "expr": "ImprovementColour"
+              }
+            },
+            {
+              "test": "datum.OutsideLCL === 1 && datum.TargetDirection === 'Low'",
+              "value": {
+                "expr": "ImprovementColour"
+              }
+            },
+            {
+              "test": "datum.UCLTwoOfThreeBeyondTwoSigma === 1 && datum.TargetDirection === 'High'",
+              "value": {
+                "expr": "ImprovementColour"
+              }
+            },
+            {
+              "test": "datum.LCLTwoOfThreeBeyondTwoSigma === 1 && datum.TargetDirection === 'Low'",
+              "value": {
+                "expr": "ImprovementColour"
+              }
+            },
+            {
+              "test": "if(datum.MeanScore >= MeanGroupSizeThreshold && if(datum.Result > datum.Mean, 1, 0) == 1, 1, 0) === 1 && datum.TargetDirection === 'High'",
+              "value": {
+                "expr": "ImprovementColour"
+              }
+            },
+            {
+              "test": "if(datum.MeanScore >= MeanGroupSizeThreshold && if(datum.Result < datum.Mean, 1, 0) == 1, 1, 0) === 1 && datum.TargetDirection === 'Low'",
+              "value": {
+                "expr": "ImprovementColour"
+              }
+            },
+            {
+              "test": "datum.TrendUpThreshold === 1 && datum.TargetDirection === 'High'",
+              "value": {
+                "expr": "ImprovementColour"
+              }
+            },
+            {
+              "test": "datum.TrendDownThreshold === 1 && datum.TargetDirection === 'Low'",
+              "value": {
+                "expr": "ImprovementColour"
+              }
+            },
+            {
+              "test": "datum.OutsideUCL === 1 && datum.TargetDirection === 'Low'",
+              "value": {
+                "expr": "ConcernColour"
+              }
+            },
+            {
+              "test": "datum.OutsideLCL === 1 && datum.TargetDirection === 'High'",
+              "value": {
+                "expr": "ConcernColour"
+              }
+            },
+            {
+              "test": "datum.UCLTwoOfThreeBeyondTwoSigma === 1 && datum.TargetDirection === 'Low'",
+              "value": {
+                "expr": "ConcernColour"
+              }
+            },
+            {
+              "test": "datum.LCLTwoOfThreeBeyondTwoSigma === 1 && datum.TargetDirection === 'High'",
+              "value": {
+                "expr": "ConcernColour"
+              }
+            },
+            {
+              "test": "if(datum.MeanScore >= MeanGroupSizeThreshold && if(datum.Result > datum.Mean, 1, 0) == 1, 1, 0) === 1 && datum.TargetDirection === 'Low'",
+              "value": {
+                "expr": "ConcernColour"
+              }
+            },
+            {
+              "test": "if(datum.MeanScore >= MeanGroupSizeThreshold && if(datum.Result < datum.Mean, 1, 0) == 1, 1, 0) === 1 && datum.TargetDirection === 'High'",
+              "value": {
+                "expr": "ConcernColour"
+              }
+            },
+            {
+              "test": "datum.TrendUpThreshold === 1 && datum.TargetDirection === 'Low'",
+              "value": {
+                "expr": "ConcernColour"
+              }
+            },
+            {
+              "test": "datum.TrendDownThreshold === 1 && datum.TargetDirection === 'High'",
+              "value": {
+                "expr": "ConcernColour"
+              }
+            }
+          ],
+          "value": {
+            "expr": "CommonCauseColour"
+          }
+        },
+        "size": {"value": 80},
+        "x": {
+          "field": "Date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "Result",
+          "type": "quantitative"
+        }
+      }
+    }
+  ],
+  "encoding": {
+    "x": {
+      "axis": {"title": "End Of Month"}
+    },
+    "y": {"axis": {"title": "Result"}}
+  }
+}
