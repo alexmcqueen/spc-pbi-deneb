@@ -32,7 +32,7 @@ Deneb can be added to your Power BI file from AppSource. If you are using the Po
 ## Setting up Power BI to use Deneb Visual
 The deneb visual has been designed to do most of the hard work within the visual itself. This means there is limited amount of setup you have to do with the data and associated DAX measures to get it to work. It also makes it easier to update the visual if any changes of made to the codebase. 
 
-### Fields for the Deneb Visual
+## Fields for the Deneb Visual
 Fields for the Deneb visual must be named correctly on the values section of the visualisation pane. The following fields should be used:
 
 #### Date
