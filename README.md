@@ -39,8 +39,8 @@ Fields for the Deneb visual must be named correctly on the values section of the
 Used in our x-axis to plot data points over time. Should be in a date format. Results will be ordered and evaluated against each other in date sequence. 
 #### Result
 The result for each data point. Should be passed in as a measure. 
-#### TargetDirection.
-Should be a value of "High" or "Low". High denotes that points going up in value describe an imporvement. Low denotes that points going down in value denote concern. Determines if a data point should be of improvement or of concern. If no target direction is provided then a default of High will be used. 
+#### TargetDirection (optional)
+Should be a value of "High" or "Low". High denotes that points going up in value describe an imporvement. Low denotes that points going down in value denote concern. Determines if a data point should be of improvement or of concern. If no target direction is provided then a default will be used defined in the parameter DefaultTargetDirection. 
 #### Target (optional)
 This is used to draw a target line onto the chart. 
 
@@ -59,6 +59,8 @@ Defines the colour of a marker if no concern or improvement rule is breached. Th
 The minimum amount of sequential points needed to trigger the mean run rule. Sequential points have to be above or below the threshold to qualify. 
 #### TrendGroupSizeThreshold
 The minimum amount of sequential points needed to trigger the trend run rule. Sequential points have to be on / above or on / below the threshold to qualify. 
+### DefaultTargetDirection
+The default direction for improvement if no direction is provided by the user. This will default to High. 
 
 ### Transform
 To simplify the amount of setup needed the majorty of calculations are done in the transform section of the specification.json. This significantly reduces the number of fields that are required for the visual and the amount of DAX to code. 
