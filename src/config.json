@@ -63,6 +63,10 @@
     "labelColor": "#605E5C"
   },
   "legend": {
+    "title": "Legend Title",
+    "values": ["A", "B", "C"],
+    "type": "symbol",
+    "orient": "bottom",
     "titleFont": "Segoe UI",
     "titleFontWeight": "bold",
     "titleColor": "#605E5C",
