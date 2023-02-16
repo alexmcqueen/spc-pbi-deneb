@@ -49,6 +49,8 @@ The specification.json makes up the bulk of the visual. The following section de
 
 ### Params
 A number of parameters are defined to make it easier to work with the code.
+#### SplitMarkers
+Defines if the marker showing when a point is improving, of concern or common cause can be split. Sometimes a marker can be part of both an imporvement and concern group. if this is set to true then a marker can show a split circle. If set to false and a data point is part of both an improvement and concern group, it will show as improving. 
 #### ConcernColour
 Defines the colour of the marker if a concern rule is breached and no improvement rule is breached for the same point. The colour is a Hex representation of the default NHS marker colour. 
 #### ImprovementColour
@@ -59,8 +61,10 @@ Defines the colour of a marker if no concern or improvement rule is breached. Th
 The minimum amount of sequential points needed to trigger the mean run rule. Sequential points have to be above or below the threshold to qualify. 
 #### TrendGroupSizeThreshold
 The minimum amount of sequential points needed to trigger the trend run rule. Sequential points have to be on / above or on / below the threshold to qualify. 
-### DefaultTargetDirection
+#### DefaultTargetDirection
 The default direction for improvement if no direction is provided by the user. This will default to High. 
+#### ChartTitle
+The default name for the chart title. 
 
 ### Transform
 To simplify the amount of setup needed the majorty of calculations are done in the transform section of the specification.json. This significantly reduces the number of fields that are required for the visual and the amount of DAX to code. 
@@ -122,6 +126,22 @@ Counts the number of results in each trend group. This is used to determine if a
 Determines if a datapoint has breached the trend threshold. The trend score is compared to the parameter TrendGroupSizeThreshold to see if breached the threshold. 
 #### TrendEqual
 Checks to see if the current row is equal to the prior row.
+#### IsImprovement
+Determines if a data point corresponds to an improvement rule. 
+#### IsConcern
+Determines if a data point corresponds to a concern rule.
+#### IsCommonCause
+Determine if a data point corresponds to common cause.
+#### PrimarySPCCategory
+The primary SPC category for a data point. If a data point is flagged as both improvement and concern it will show as improvement. 
+#### IsSecondarySPCCategory
+Shows the secondary SPC category. If the parameter SplitMarkers is set to true then when a data point is flagged as both improvement and concern it will show as improvement. If the parameter SplitMarkers is set to false then this will match the results of PrimarySPCCategory. 
+#### ImprovementComments
+Generates the improvements comments for a data point. 
+#### ConcernComments
+Generates the concern comments for a data point. 
+#### SPCCategoryToolTip
+Generates the text which will be shown on the tooltip for the SPC category. This will combine the text generate in the fields ImprovementComments and ConcernComments. 
 
 ### Layer
 The visual is made up of a number of different layers that contribute to the end design. There are lines drawn for the UCL, LCL, mean and if applicable the target. The results are also shown as a line. For each result datapoint a marker is shown which represents it's status against the SPC rules. Datapoints which breach rules will be shown as either improvement or concern. If a datapoint does not breach any rule then it will be shown as having common cause. 
