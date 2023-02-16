@@ -1,6 +1,10 @@
 {
   "params": [
     {
+      "name": "SplitMarkers",
+      "value": true
+    },
+    {
       "name": "ConcernColour",
       "value": "#FE9E00"
     },
@@ -218,10 +222,43 @@
     {
       "calculate": "if(datum.Result == datum.Prior1Row && isValid(datum.Prior1Row), 1, 0)",
       "as": "TrendEqual"
+    },
+    {
+      "calculate": "if((datum.ImprovementDirection == 'High' && (datum.OutsideUCL == 1 || datum.UCLTwoOfThreeBeyondTwoSigma == 1 || (datum.MeanScore >= MeanGroupSizeThreshold && datum.Result > datum.Mean) || datum.TrendUpThreshold == 1)) || (datum.ImprovementDirection == 'Low' && (datum.OutsideLCL == 1 || datum.LCLTwoOfThreeBeyondTwoSigma == 1 || (datum.MeanScore >= MeanGroupSizeThreshold && datum.Result < datum.Mean) || datum.TrendDownThreshold == 1)), 1, 0)",
+      "as": "IsImprovement"
+    },
+    {
+      "calculate": "if((datum.ImprovementDirection == 'Low' && (datum.OutsideUCL == 1 || datum.UCLTwoOfThreeBeyondTwoSigma == 1 || (datum.MeanScore >= MeanGroupSizeThreshold && datum.Result > datum.Mean) || datum.TrendUpThreshold == 1)) || (datum.ImprovementDirection == 'High' && (datum.OutsideLCL == 1 || datum.LCLTwoOfThreeBeyondTwoSigma == 1 || (datum.MeanScore >= MeanGroupSizeThreshold && datum.Result < datum.Mean) || datum.TrendDownThreshold == 1)), 1, 0)",
+      "as": "IsConcern"
+    },
+    {
+      "calculate": "if(datum.IsImprovement == 0 && datum.IsConcern == 0, 1, 0)",
+      "as": "IsCommonCause"
+    },
+    {
+      "calculate": "if(datum.IsImprovement == 1, 'Improvement', if(datum.IsConcern == 1, 'Concern', 'Common Cause'))",
+      "as": "PrimarySPCCategory"
+    },
+    {
+      "calculate": "if(datum.IsImprovement == 1 && datum.IsConcern == 1 && SplitMarkers == true, 'Concern', datum.PrimarySPCCategory)",
+      "as": "SecondarySPCCategory"
+    },
+    {
+      "calculate": "if(datum.ImprovementDirection == 'High' && datum.OutsideUCL == 1, ' It is an astronomical point.', '') + if(datum.ImprovementDirection == 'Low' && datum.OutsideLCL, ' It is an astronomical point.', '') + if(datum.ImprovementDirection == 'High' && datum.UCLTwoOfThreeBeyondTwoSigma == 1, ' It is in a group close to the two sigma boundary.', '') + if(datum.ImprovementDirection == 'Low' && datum.LCLTwoOfThreeBeyondTwoSigma, ' It is in a group close to the two sigma boundary.', '') + if(datum.ImprovementDirection == 'High' && datum.TrendUpThreshold == 1, ' It is part of a group of points trending up.', '') + if(datum.ImprovementDirection == 'Low' && datum.TrendDownThreshold, ' It is part of a group of points trending down.', '') + if(datum.ImprovementDirection == 'High' && (datum.MeanScore >= MeanGroupSizeThreshold && datum.Result > datum.Mean), ' It is part of a run above the mean.', '')",
+      "as": "ImprovementComments"
+    },
+    {
+      "calculate": "if(datum.ImprovementDirection == 'Low' && datum.OutsideUCL == 1, ' It is an astronomical point.', '') + if(datum.ImprovementDirection == 'High' && datum.OutsideLCL, ' It is an astronomical point.', '') + if(datum.ImprovementDirection == 'Low' && datum.UCLTwoOfThreeBeyondTwoSigma == 1, ' It is in a group close to the two sigma boundary.', '') + if(datum.ImprovementDirection == 'High' && datum.LCLTwoOfThreeBeyondTwoSigma, ' It is in a group close to the two sigma boundary.', '') + if(datum.ImprovementDirection == 'Low' && datum.TrendUpThreshold == 1, ' It is part of a group of points trending up.', '') + if(datum.ImprovementDirection == 'High' && datum.TrendDownThreshold, ' It is part of a group of points trending down.', '') + if(datum.ImprovementDirection == 'Low' && (datum.MeanScore >= MeanGroupSizeThreshold && datum.Result > datum.Mean), ' It is part of a run above the mean.', '') + if(datum.ImprovementDirection == 'High' && (datum.MeanScore >= MeanGroupSizeThreshold && datum.Result < datum.Mean), ' It is part of a run below the mean.', '')",
+      "as": "ConcernComments"
+    },
+    {
+      "calculate": "if(datum.PrimarySPCCategory != datum.SecondarySPCCategory, 'This datapoint is part of both improvement and concern groups. ' + datum.ImprovementComments + ' ' + datum.ConcernComments, if(datum.PrimarySPCCategory == 'Improvement', 'This data point shows improvement. ' + datum.ImprovementComments, if(datum.PrimarySPCCategory == 'Concern', 'Datapoint is of concern. ' + datum.ConcernComments, 'Datapoint is of common cause.')))",
+      "as": "SPCCategoryTooltip"
     }
   ],
   "title": {
-    "text": {"expr": "ChartTitle"}
+    "text": {"expr": "ChartTitle"},
+    "offset": 10
   },
   "layer": [
     {
@@ -231,7 +268,7 @@
         "opacity": 0.4
       },
       "encoding": {
-        "color": {"value": "gray"},
+        "color": {"datum": "Mean Line"},
         "x": {
           "field": "Date",
           "type": "temporal"
@@ -249,7 +286,9 @@
         "strokeDash": [1, 5]
       },
       "encoding": {
-        "color": {"value": "green"},
+        "color": {
+          "datum": "Target Line"
+        },
         "x": {
           "field": "Date",
           "type": "temporal"
@@ -324,97 +363,13 @@
         "color": {
           "condition": [
             {
-              "test": "datum.OutsideUCL === 1 && datum.ImprovementDirection === 'High'",
+              "test": "datum.PrimarySPCCategory === 'Improvement'",
               "value": {
                 "expr": "ImprovementColour"
               }
             },
             {
-              "test": "datum.OutsideLCL === 1 && datum.ImprovementDirection === 'Low'",
-              "value": {
-                "expr": "ImprovementColour"
-              }
-            },
-            {
-              "test": "datum.UCLTwoOfThreeBeyondTwoSigma === 1 && datum.ImprovementDirection === 'High'",
-              "value": {
-                "expr": "ImprovementColour"
-              }
-            },
-            {
-              "test": "datum.LCLTwoOfThreeBeyondTwoSigma === 1 && datum.ImprovementDirection === 'Low'",
-              "value": {
-                "expr": "ImprovementColour"
-              }
-            },
-            {
-              "test": "if(datum.MeanScore >= MeanGroupSizeThreshold && if(datum.Result > datum.Mean, 1, 0) == 1, 1, 0) === 1 && datum.ImprovementDirection === 'High'",
-              "value": {
-                "expr": "ImprovementColour"
-              }
-            },
-            {
-              "test": "if(datum.MeanScore >= MeanGroupSizeThreshold && if(datum.Result < datum.Mean, 1, 0) == 1, 1, 0) === 1 && datum.ImprovementDirection === 'Low'",
-              "value": {
-                "expr": "ImprovementColour"
-              }
-            },
-            {
-              "test": "datum.TrendUpThreshold === 1 && datum.ImprovementDirection === 'High'",
-              "value": {
-                "expr": "ImprovementColour"
-              }
-            },
-            {
-              "test": "datum.TrendDownThreshold === 1 && datum.ImprovementDirection === 'Low'",
-              "value": {
-                "expr": "ImprovementColour"
-              }
-            },
-            {
-              "test": "datum.OutsideUCL === 1 && datum.ImprovementDirection === 'Low'",
-              "value": {
-                "expr": "ConcernColour"
-              }
-            },
-            {
-              "test": "datum.OutsideLCL === 1 && datum.ImprovementDirection === 'High'",
-              "value": {
-                "expr": "ConcernColour"
-              }
-            },
-            {
-              "test": "datum.UCLTwoOfThreeBeyondTwoSigma === 1 && datum.ImprovementDirection === 'Low'",
-              "value": {
-                "expr": "ConcernColour"
-              }
-            },
-            {
-              "test": "datum.LCLTwoOfThreeBeyondTwoSigma === 1 && datum.ImprovementDirection === 'High'",
-              "value": {
-                "expr": "ConcernColour"
-              }
-            },
-            {
-              "test": "if(datum.MeanScore >= MeanGroupSizeThreshold && if(datum.Result > datum.Mean, 1, 0) == 1, 1, 0) === 1 && datum.ImprovementDirection === 'Low'",
-              "value": {
-                "expr": "ConcernColour"
-              }
-            },
-            {
-              "test": "if(datum.MeanScore >= MeanGroupSizeThreshold && if(datum.Result < datum.Mean, 1, 0) == 1, 1, 0) === 1 && datum.ImprovementDirection === 'High'",
-              "value": {
-                "expr": "ConcernColour"
-              }
-            },
-            {
-              "test": "datum.TrendUpThreshold === 1 && datum.ImprovementDirection === 'Low'",
-              "value": {
-                "expr": "ConcernColour"
-              }
-            },
-            {
-              "test": "datum.TrendDownThreshold === 1 && datum.ImprovementDirection === 'High'",
+              "test": "datum.PrimarySPCCategory === 'Concern'",
               "value": {
                 "expr": "ConcernColour"
               }
@@ -424,7 +379,7 @@
             "expr": "CommonCauseColour"
           }
         },
-        "size": {"value": 80},
+        "size": {"value": 100},
         "x": {
           "field": "Date",
           "type": "temporal",
@@ -466,15 +421,77 @@
             "type": "quantitative",
             "format": ".2f",
             "title": "LCL"
+          },
+          {
+            "field": "ImprovementDirection",
+            "type": "nominal",
+            "title": "Improvement Direction"
+          },
+          {
+            "field": "SPCCategoryTooltip",
+            "type": "nominal",
+            "title": "SPC Category"
           }
         ]
+      }
+    },
+    {
+      "mark": {
+        "type": "arc",
+        "theta": {"expr": "PI"},
+        "innerRadius": 0,
+        "outerRadius": 5.2
+      },
+      "encoding": {
+        "color": {
+          "condition": [
+            {
+              "test": "datum.SecondarySPCCategory === 'Improvement'",
+              "value": {
+                "expr": "ImprovementColour"
+              }
+            },
+            {
+              "test": "datum.SecondarySPCCategory === 'Concern'",
+              "value": {
+                "expr": "ConcernColour"
+              }
+            }
+          ],
+          "value": {
+            "expr": "CommonCauseColour"
+          }
+        },
+        "x": {
+          "field": "Date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "Result",
+          "type": "quantitative"
+        }
       }
     }
   ],
   "encoding": {
     "x": {
-      "axis": {"title": "End Of Month"}
+      "axis": {
+        "title": null,
+        "labelAngle": -30,
+        "labelOverlap": false,
+        "labelPadding": 5
+      }
     },
-    "y": {"axis": {"title": "Result"}}
+    "y": {"axis": {"title": null}},
+    "color": {
+      "type": "nominal",
+      "scale": {
+        "domain": [
+          "Mean Line",
+          "Target Line"
+        ],
+        "range": ["gray", "green"]
+      }
+    }
   }
 }
