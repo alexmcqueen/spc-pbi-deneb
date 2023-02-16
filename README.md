@@ -11,16 +11,16 @@ SPC is widely used in the NHS to understand whether change results in improvemen
 
 The SPC visual created using deneb is made up of four rules. If a rule is broken then the data points will show as being of improvement or of concern. This is be determined by the direction of travel; are points going up good or bad?
 
-Rule 1. A single point outside the process limit.
+**Rule 1**. A single point outside the process limit.
 Checks to see if point x is outside the process control limit, at either end. This is called an astronomical point. Points are counted in isolation so two points in a row outside the process limit would both count. 
                 
-Rule 2. Two of three data points close to a process limit.
+**Rule 2**. Two of three data points close to a process limit.
 A data point is close to the process limit  if it is within two sigma. Data points count if they are either "close" to the process limit AND DO NOT GO ABOVE THE process limit. For the data points to count, two out of three have to meet this criteria. Points which are part of a two out of three sequence but not "close" or over are not shown as improvement or concern. 
                 
-Rule 3. Shift of points above / below the mean line.
+**Rule 3**. Shift of points above / below the mean line.
 Look for x number of points with fall above or below the mean in an unbroken order. X is defined in the specification.json file under the params section. A default of 7 is applied. 
                 
-Rule 4. Run of data points in ascending or descending order.
+**Rule 4**. Run of data points in ascending or descending order.
 Look for x number of points with ascending or descending in an unbroken order. X is defined in the specification.json file under the params section. A default of 7 is applied. 
 
 SPC charts that match the NHS requirements are not available within Power BI out of the box. As of this writing some solutions for custom visuals are available but usually come with associated costs to use their full functionality. Sometimes SPC calculations are derived within the dataset that is made available for Power BI. This can be a good solution but means custom filtering will not re-calculate the rules and restricts the flexibility of a solution to only pre-calculated combinations. It is also possible to code up the rules in DAX. However this creates a huge number of measures which need to be generated into each model. If a change to the ruleset is needed then it is very complex to maintain. Deneb provides a nice option as the full code can be pasted into the specification and config sections easily and a minimal number of DAX measures need to be passed to the visual. 
