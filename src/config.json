@@ -19,6 +19,7 @@
     "strokeWidth": 1.5,
     "size": 50
   },
+  "title": {"fontSize": 16},
   "text": {
     "font": "Segoe UI",
     "fontSize": 12,
@@ -64,16 +65,13 @@
   },
   "legend": {
     "title": "Legend Title",
-    "values": ["A", "B", "C"],
-    "type": "symbol",
-    "orient": "bottom",
+    "orient": "top",
     "titleFont": "Segoe UI",
     "titleFontWeight": "bold",
     "titleColor": "#605E5C",
     "labelFont": "Segoe UI",
-    "labelFontSize": 13.333333333333332,
+    "labelFontSize": 12,
     "labelColor": "#605E5C",
-    "symbolType": "circle",
-    "symbolSize": 75
+    "symbolOpacity": 1
   }
 }
