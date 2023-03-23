@@ -64,7 +64,9 @@ The minimum amount of sequential points needed to trigger the trend run rule. Se
 #### DefaultTargetDirection
 The default direction for improvement if no direction is provided by the user. This will default to High. 
 #### ChartTitle
-The default name for the chart title. 
+The default name for the chart title.
+####PinYAxisToZero
+Defines if you set to y-axis bottom point to 0 or not. Can be set to True or False.
 
 ### Transform
 To simplify the amount of setup needed the majorty of calculations are done in the transform section of the specification.json. This significantly reduces the number of fields that are required for the visual and the amount of DAX to code. 
