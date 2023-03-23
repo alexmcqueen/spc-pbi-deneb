@@ -138,7 +138,7 @@
       "as": "UCLTwoOfThreeBeyondTwoSigma"
     },
     {
-      "calculate": "if((datum.Result < (datum.Mean + (datum.MovingRangeAverage * 1.77))) && (datum.Result >= (datum.Mean + (datum.MovingRangeAverage * 2.66))), 1, 0)",
+      "calculate": "if((datum.Result < (datum.Mean - (datum.MovingRangeAverage * 1.77))) && (datum.Result >= (datum.Mean - (datum.MovingRangeAverage * 2.66))), 1, 0)",
       "as": "NearLCL"
     },
     {
