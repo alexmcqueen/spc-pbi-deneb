@@ -36,6 +36,18 @@
   "data": {"name": "dataset"},
   "transform": [
     {
+      "calculate": "'Mean'",
+      "as": "Mean Legend"
+    },
+    {
+      "calculate": "'Target'",
+      "as": "Target Legend"
+    },
+    {
+      "calculate": "'Result'",
+      "as": "Result Legend"
+    },
+    {
       "calculate": "if(isValid(datum.TargetDirection), datum.TargetDirection, DefaultTargetDirection)",
       "as": "ImprovementDirection"
     },
@@ -265,10 +277,22 @@
       "mark": {
         "type": "line",
         "strokeWidth": 2,
-        "opacity": 0.4
+        "opacity": 0.4,
+        "color": "gray"
       },
       "encoding": {
-        "color": {"datum": "Mean Line"},
+        "color": {
+          "field": "Mean Legend",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Mean"],
+            "range": ["gray"]
+          },
+          "legend": {
+            "title": null,
+            "symbolType": "stroke"
+          }
+        },
         "x": {
           "field": "Date",
           "type": "temporal"
@@ -283,11 +307,18 @@
       "mark": {
         "type": "line",
         "strokeWidth": 2,
-        "strokeDash": [1, 5]
+        "strokeDash": [1, 5],
+        "color": "green"
       },
       "encoding": {
         "color": {
-          "datum": "Target Line"
+          "field": "Target Legend",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Target"],
+            "range": ["green"]
+          },
+          "legend": {"title": null}
         },
         "x": {
           "field": "Date",
@@ -340,10 +371,19 @@
     {
       "mark": {
         "type": "line",
-        "strokeWidth": 2
+        "strokeWidth": 2,
+        "color": "black"
       },
       "encoding": {
-        "color": {"value": "black"},
+        "color": {
+          "field": "Result Legend",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Result"],
+            "range": ["black"]
+          },
+          "legend": {"title": null}
+        },
         "x": {
           "field": "Date",
           "type": "temporal"
@@ -361,23 +401,21 @@
       },
       "encoding": {
         "color": {
-          "condition": [
-            {
-              "test": "datum.PrimarySPCCategory === 'Improvement'",
-              "value": {
-                "expr": "ImprovementColour"
-              }
-            },
-            {
-              "test": "datum.PrimarySPCCategory === 'Concern'",
-              "value": {
-                "expr": "ConcernColour"
-              }
-            }
-          ],
-          "value": {
-            "expr": "CommonCauseColour"
-          }
+          "field": "PrimarySPCCategory",
+          "type": "nominal",
+          "scale": {
+            "domain": [
+              "Improvement",
+              "Concern",
+              "Common Cause"
+            ],
+            "range": [
+              {"expr": "ImprovementColour"},
+              {"expr": "ConcernColour"},
+              {"expr": "CommonCauseColour"}
+            ]
+          },
+          "legend": {"title": null}
         },
         "size": {"value": 100},
         "x": {
@@ -473,6 +511,10 @@
       }
     }
   ],
+  "resolve": {
+    "legend": {"color": "independent"},
+    "scale": {"color": "independent"}
+  },
   "encoding": {
     "x": {
       "axis": {
@@ -482,16 +524,9 @@
         "labelPadding": 5
       }
     },
-    "y": {"axis": {"title": null}},
-    "color": {
-      "type": "nominal",
-      "scale": {
-        "domain": [
-          "Mean Line",
-          "Target Line"
-        ],
-        "range": ["gray", "green"]
-      }
+    "y": {
+      "axis": {"title": null},
+      "scale": {"zero": true}
     }
   }
 }
