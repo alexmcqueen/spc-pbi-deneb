@@ -31,6 +31,10 @@
     {
       "name": "ChartTitle",
       "value": "Enter chart title here"
+    },
+    {
+      "name": "PinYAxisToZero",
+      "value": false
     }
   ],
   "data": {"name": "dataset"},
@@ -475,31 +479,28 @@
     },
     {
       "mark": {
-        "type": "arc",
-        "theta": {"expr": "PI"},
-        "innerRadius": 0,
-        "outerRadius": 5.2
+        "type": "circle",
+        "opacity": 1
       },
       "encoding": {
         "color": {
-          "condition": [
-            {
-              "test": "datum.SecondarySPCCategory === 'Improvement'",
-              "value": {
-                "expr": "ImprovementColour"
-              }
-            },
-            {
-              "test": "datum.SecondarySPCCategory === 'Concern'",
-              "value": {
-                "expr": "ConcernColour"
-              }
-            }
-          ],
-          "value": {
-            "expr": "CommonCauseColour"
-          }
+          "field": "SecondarySPCCategory",
+          "type": "nominal",
+          "scale": {
+            "domain": [
+              "Improvement",
+              "Concern",
+              "Common Cause"
+            ],
+            "range": [
+              {"expr": "ImprovementColour"},
+              {"expr": "ConcernColour"},
+              {"expr": "CommonCauseColour"}
+            ]
+          },
+          "legend": null
         },
+        "size": {"value": 20},
         "x": {
           "field": "Date",
           "type": "temporal"
@@ -526,7 +527,7 @@
     },
     "y": {
       "axis": {"title": null},
-      "scale": {"zero": true}
+      "scale": {"zero": {"expr": "PinYAxisToZero"}}
     }
   }
 }
