@@ -577,8 +577,8 @@
     {
       "mark": {
         "type": "image",
-        "width": 50,
-        "height": 50,
+        "width": 40,
+        "height": 40,
         "tooltip": false,
         "align": "left",
         "baseline": "bottom",
@@ -608,13 +608,13 @@
     {
       "mark": {
         "type": "image",
-        "width": 50,
-        "height": 50,
+        "width": 40,
+        "height": 40,
         "tooltip": false,
         "align": "left",
         "baseline": "bottom",
         "yOffset": -10,
-        "xOffset": 55
+        "xOffset": 50
       },
       "encoding": {
         "x": {
