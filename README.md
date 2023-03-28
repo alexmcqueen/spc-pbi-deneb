@@ -15,13 +15,13 @@ The SPC visual created using deneb is made up of four rules. If a rule is broken
 Checks to see if point x is outside the process control limit, at either end. This is called an astronomical point. Points are counted in isolation so two points in a row outside the process limit would both count. 
                 
 **Rule 2**. Two of three data points close to a process limit.
-A data point is close to the process limit  if it is within two sigma. Data points count if they are either "close" to the process limit AND DO NOT GO ABOVE THE process limit. For the data points to count, two out of three have to meet this criteria. Points which are part of a two out of three sequence but not "close" or over are not shown as improvement or concern. 
+A data point is close to the process limit if it is within two sigma. Data points count if they are either "close" to the process limit AND DO NOT GO ABOVE THE process limit. For the data points to count, two out of three have to meet this criteria. Points which are part of a two out of three sequence but not "close" or over are not shown as improvement or concern. 
                 
 **Rule 3**. Shift of points above / below the mean line.
-Look for x number of points with fall above or below the mean in an unbroken order. X is defined in the specification.json file under the params section. A default of 7 is applied. 
+Look for x number of points which fall above or below the mean in an unbroken order. X is defined in the specification.json file under the params section. A default of 7 is applied. 
                 
 **Rule 4**. Run of data points in ascending or descending order.
-Look for x number of points with ascending or descending in an unbroken order. X is defined in the specification.json file under the params section. A default of 7 is applied. 
+Look for x number of points ascending or descending in an unbroken order. X is defined in the specification.json file under the params section. A default of 7 is applied. 
 
 SPC charts that match the NHS requirements are not available within Power BI out of the box. As of this writing some solutions for custom visuals are available but usually come with associated costs to use their full functionality. Sometimes SPC calculations are derived within the dataset that is made available for Power BI. This can be a good solution but means custom filtering will not re-calculate the rules and restricts the flexibility of a solution to only pre-calculated combinations. It is also possible to code up the rules in DAX. However this creates a huge number of measures which need to be generated into each model. If a change to the ruleset is needed then it is very complex to maintain. Deneb provides a nice option as the full code can be pasted into the specification and config sections easily and a minimal number of DAX measures need to be passed to the visual. 
                 
@@ -30,7 +30,7 @@ SPC charts that match the NHS requirements are not available within Power BI out
 Deneb can be added to your Power BI file from AppSource. If you are using the Power BI Service and have organisational policies setup you may need Deneb to be added to your "Organizational visuals" menu within the Admin portal. Your Power BI administrator will be able to assist with this if you do not have access to do it yourself. 
 
 ## Setting up Power BI to use Deneb Visual
-The deneb visual has been designed to do most of the hard work within the visual itself. This means there is limited amount of setup you have to do with the data and associated DAX measures to get it to work. It also makes it easier to update the visual if any changes of made to the codebase. To get started just paste the config.json and specification.json into the Deneb Power BI visual and add in the mandatory measures. 
+The deneb visual has been designed to do most of the hard work within the visual itself. This means there is limited amount of setup you have to do with the data and associated DAX measures to get it to work. It also makes it easier to update the visual if any changes are made to the codebase. To get started just paste the config.json and specification.json into the Deneb Power BI visual and add in the mandatory measures. 
 
 ## Fields for the Deneb Visual
 Fields for the Deneb visual must be named correctly on the values section of the visualisation pane. The following fields should be used:
@@ -67,14 +67,20 @@ The default direction for improvement if no direction is provided by the user. T
 The default name for the chart title.
 ####PinYAxisToZero
 Defines if you set to y-axis bottom point to 0 or not. Can be set to True or False.
+####Image Parameters
+These are a set of parameters which hold the base64 encoding for the images used for variation and assurance. 
 
 ### Transform
 To simplify the amount of setup needed the majority of calculations are done in the transform section of the specification.json. This significantly reduces the number of fields that are required for the visual and the amount of DAX to code. 
+### RowReverseOrder
+Calculates the reverse order of the data points. Used to help identify the last data point in the series.
+#### ImprovementDirection
+Calculates the direction of improvement. This is based on the target direction provided as a measure. If no target direction is provided the default is taken from the parameter.
 #### Mean
 Calculates the mean. The mean is calculated across all points visible in the visual.
-#### Prior1Result
+#### Prior1Row
 The result value for the previous row in date order. Null is used when there is no prior result. 
-#### Following1Result
+#### Following1Row
 The result value for the next row in date order. Null is used when there is no following result. 
 #### MovingAverage
 The moving average of each result. This is calculated from the absolute different between the current result and previous result in the ordered dataset.
@@ -137,13 +143,23 @@ Determine if a data point corresponds to common cause.
 #### PrimarySPCCategory
 The primary SPC category for a data point. If a data point is flagged as both improvement and concern it will show as improvement. 
 #### IsSecondarySPCCategory
-Shows the secondary SPC category. If the parameter SplitMarkers is set to true then when a data point is flagged as both improvement and concern it will show as improvement. If the parameter SplitMarkers is set to false then this will match the results of PrimarySPCCategory. 
+Shows the secondary SPC category. If the parameter SplitMarkers is set to true then when a data point is flagged as both improvement and concern it will show as concern (PrimarySPCCategory will be shown as improvement). If the parameter SplitMarkers is set to false then this will match the results of PrimarySPCCategory. 
 #### ImprovementComments
 Generates the improvements comments for a data point. 
 #### ConcernComments
 Generates the concern comments for a data point. 
 #### SPCCategoryToolTip
 Generates the text which will be shown on the tooltip for the SPC category. This will combine the text generate in the fields ImprovementComments and ConcernComments. 
+#### SPCImageUrl
+Calculates the base64 image encoding to use for variation. This will only be generated for the last datapoint in the series.
+#### SPCImageTooltip
+Calculates the tooltip text for the variation tooltip. This will only be generated for the last datapoint in the series.
+#### Capability
+Calculates the capability of the data series. 
+#### CapabilityImageUrl
+Calculates the base64 image encodoing to use for assurance. This will only be generated for the last datapoint in the series. 
+#### CapabilityImageTooltip
+Calculates the tooltip text for the assurance tooltip. This will only be generated for the last datapoint in the series. 
 
 ### Layer
 The visual is made up of a number of different layers that contribute to the end design. There are lines drawn for the UCL, LCL, mean and if applicable the target. The results are also shown as a line. For each result datapoint a marker is shown which represents it's status against the SPC rules. Datapoints which breach rules will be shown as either improvement or concern. If a datapoint does not breach any rule then it will be shown as having common cause. 
