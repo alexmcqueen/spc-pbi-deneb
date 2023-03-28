@@ -1,5 +1,7 @@
 # Statistical Process Control (SPC) NHS Deneb Custom Visual for Power BI
-Code relating to working with Statistical Process Charts (SPC) in a UK NHS setting.
+Code relating to the creation of a XMR Statistical Process Charts (SPC) in a UK NHS setting using vega-lite in the Deneb custom visualisation. 
+
+![SPC Chart Example](docs/images/SPC%20Chart%20Example%201.PNG)
 
 ## SPC NHS Overview
 
@@ -29,6 +31,8 @@ SPC charts that match the NHS requirements are not available within Power BI out
 
 Deneb can be added to your Power BI file from AppSource. If you are using the Power BI Service and have organisational policies setup you may need Deneb to be added to your "Organizational visuals" menu within the Admin portal. Your Power BI administrator will be able to assist with this if you do not have access to do it yourself. 
 
+![SPC Chart Example](docs/images/PBI%20Service%20Organizational%20visuals.png)
+
 ## Setting up Power BI to use Deneb Visual
 The deneb visual has been designed to do most of the hard work within the visual itself. This means there is limited amount of setup you have to do with the data and associated DAX measures to get it to work. It also makes it easier to update the visual if any changes are made to the codebase. To get started just paste the config.json and specification.json into the Deneb Power BI visual and add in the mandatory measures. 
 
@@ -51,6 +55,9 @@ The specification.json makes up the bulk of the visual. The following section de
 A number of parameters are defined to make it easier to work with the code.
 #### SplitMarkers
 Defines if the marker showing when a point is improving, of concern or common cause can be split. Sometimes a marker can be part of both an improvement and concern group. if this is set to true then a marker can show a split circle. If set to false and a data point is part of both an improvement and concern group, it will show as improving. 
+
+![SPC Chart Example](docs/images/SPC%20Chart%20Example%202.png)
+
 #### ConcernColour
 Defines the colour of the marker if a concern rule is breached and no improvement rule is breached for the same point. The colour is a Hex representation of the default NHS marker colour. 
 #### ImprovementColour
@@ -72,7 +79,7 @@ These are a set of parameters which hold the base64 encoding for the images used
 
 ### Transform
 To simplify the amount of setup needed the majority of calculations are done in the transform section of the specification.json. This significantly reduces the number of fields that are required for the visual and the amount of DAX to code. 
-### RowReverseOrder
+#### RowReverseOrder
 Calculates the reverse order of the data points. Used to help identify the last data point in the series.
 #### ImprovementDirection
 Calculates the direction of improvement. This is based on the target direction provided as a measure. If no target direction is provided the default is taken from the parameter.
