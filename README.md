@@ -72,9 +72,9 @@ The minimum amount of sequential points needed to trigger the trend run rule. Se
 The default direction for improvement if no direction is provided by the user. This will default to High. 
 #### ChartTitle
 The default name for the chart title.
-####PinYAxisToZero
+#### PinYAxisToZero
 Defines if you set to y-axis bottom point to 0 or not. Can be set to True or False.
-####Image Parameters
+#### Image Parameters
 These are a set of parameters which hold the base64 encoding for the images used for variation and assurance. 
 
 ### Transform
