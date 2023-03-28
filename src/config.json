@@ -1,4 +1,5 @@
 {
+  "description": "NHS XmR SPC Chart. Version 0.1",
   "view": {"stroke": "transparent"},
   "font": "Segoe UI",
   "arc": {},
@@ -45,13 +46,13 @@
   },
   "axisX": {
     "labelPadding": 5,
-    "labelFont": "Segoe UI",
+    "labelFont": "Segoe UI Light",
     "labelFontSize": 10,
     "titleFont": "Segoe UI"
   },
   "axisY": {
     "labelPadding": 10,
-    "labelFont": "Segoe UI",
+    "labelFont": "Segoe UI Light",
     "labelFontSize": 10,
     "titleFont": "Segoe UI"
   },
@@ -65,12 +66,12 @@
   },
   "legend": {
     "title": "Legend Title",
-    "orient": "top",
+    "orient": "bottom",
     "titleFont": "Segoe UI",
     "titleFontWeight": "bold",
     "titleColor": "#605E5C",
-    "labelFont": "Segoe UI",
-    "labelFontSize": 12,
+    "labelFont": "Segoe UI Light",
+    "labelFontSize": 10,
     "labelColor": "#605E5C",
     "symbolOpacity": 1
   }
