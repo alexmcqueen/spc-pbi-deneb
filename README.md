@@ -53,6 +53,8 @@ The specification.json makes up the bulk of the visual. The following section de
 
 ### Params
 A number of parameters are defined to make it easier to work with the code.
+#### MinimumDataPoints
+The minimum number of data points needed to show SPC rules. The default is set to 15. If the threshold is not met then points will not show as improvement / concern or common cause. Variation and assurance icons will be swapped in for defaults.
 #### SplitMarkers
 Defines if the marker showing when a point is improving, of concern or common cause can be split. Sometimes a marker can be part of both an improvement and concern group. if this is set to true then a marker can show a split circle. If set to false and a data point is part of both an improvement and concern group, it will show as improving. 
 
@@ -79,6 +81,8 @@ These are a set of parameters which hold the base64 encoding for the images used
 
 ### Transform
 To simplify the amount of setup needed the majority of calculations are done in the transform section of the specification.json. This significantly reduces the number of fields that are required for the visual and the amount of DAX to code. 
+#### TotalRecords
+Calculates the total number of records in the data series. This is used to determine if there is enough points to show SPC rules. 
 #### RowReverseOrder
 Calculates the reverse order of the data points. Used to help identify the last data point in the series.
 #### ImprovementDirection
