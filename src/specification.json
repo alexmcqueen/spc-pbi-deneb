@@ -1,5 +1,5 @@
 {
-  "description": "NHS XmR SPC Chart. Version 0.1",
+  "description": "NHS XmR SPC Chart. Version 0.1.0",
   "params": [
     {
       "name": "MinimumDataPoints",
